@@ -47,6 +47,7 @@ project(":desktop") {
         implementation project(":core")
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        implementation 'com.google.code.gson:gson:2.8.9'
         
     }
 }
@@ -57,6 +58,7 @@ project(":core") {
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        implementation 'com.google.code.gson:gson:2.8.9'
         
     }
 }

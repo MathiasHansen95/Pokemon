@@ -2,27 +2,24 @@ package com.mygdx.game.Data;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Pokemon {
 
     TextureAtlas atlas;
     String texturePath;
-
+    String regionPath;
     TextureRegion[] region;
     TextureRegion sprite;
+
 
     // Pokemon stats
 
     int health;
-
     int maxHealth;
-    int def;
+    int defense;
     int attack;
-    int spDef;
+    int spDefense;
     int spAttack;
     int speed;
     String name;
@@ -61,17 +58,33 @@ public class Pokemon {
 
     int actualSpeed;
 
-    public Pokemon(String name, int maxHealth, int attack, int spAttack, int def, int spDef, int speed,
-                    List<Type> type) {
+    public Pokemon(String name, int maxHealth, int attack, int spAttack, int defense, int spDefense, int speed,
+                   List<Type> type, String texturePath, String regionPath) {
 
+        //Setting Sprite
+        this.regionPath = regionPath;
+        this.texturePath = texturePath;
+
+        atlas = new TextureAtlas(texturePath);
+        sprite = atlas.findRegion(regionPath);
+        this.region = new TextureRegion[1];
+        this.region[0] = sprite;
+
+        // Check if sprite is null (indicating region not found)
+        if (sprite == null) {
+            // Handle the case where sprite is null (e.g., use a default texture)
+            System.err.println("WARNING: Texture region not found for Pokemon: " + name);
+            // You can assign a default sprite here
+        }
 
 
         this.name = name;
         this.health = maxHealth;
         this.level = 1;
-        this.currentEXP = 0;
+        this.currentEXP = 1;
+        this.expToNextLvl = 50;
         this.type = type;
-        this.nature = Natures.values()[(int) (Math.random()*Natures.values().length)];
+        this.nature = Natures.values()[(int) (Math.random() * Natures.values().length)];
         this.movesSet = new ArrayList<>();
         this.learnableMoves = new HashMap<>();
         this.isDead = false;
@@ -81,8 +94,8 @@ public class Pokemon {
         this.maxHealth = maxHealth;
         this.attack = attack;
         this.spAttack = spAttack;
-        this.def = def;
-        this.spDef = spDef;
+        this.defense = defense;
+        this.spDefense = spDefense;
         this.speed = speed;
 
 
@@ -108,27 +121,17 @@ public class Pokemon {
 
     }
 
-    public void initialize(String texturePath, String regionName) {
-        this.texturePath = texturePath;
-        atlas = new TextureAtlas(texturePath);
 
-
-        sprite = atlas.findRegion(regionName);
-        this.region = new TextureRegion[1];
-        this.region[0] = sprite;
-
-        }
-
-    public void calculateActualStat(){
+    public void calculateActualStat() {
         //TODO make a map
 
         double attackModifier = 1.0;
         double spAttackModifier = 1.0;
         double defenceModifier = 1.0;
         double speedModifier = 1.0;
-        double spDefenceModifier =1.0;
+        double spDefenceModifier = 1.0;
 
-        switch (nature){
+        switch (nature) {
             case ADAMANT:
                 attackModifier = 1.1;
                 spAttackModifier = 0.9;
@@ -192,7 +195,7 @@ public class Pokemon {
                 spDefenceModifier = 0.9;
                 break;
             case NAUGHTY:
-                attackModifier =1.1;
+                attackModifier = 1.1;
                 spDefenceModifier = 0.9;
                 break;
             case QUIET:
@@ -221,26 +224,31 @@ public class Pokemon {
         actualAttack = (int) (((getAttack() * 2 + getAttackIv()) * getLevel() / 100 + 5) * attackModifier);
         actualSpeed = (int) (((getSpeed() * 2 + getSpeedIv()) * getLevel() / 100 + 5) * speedModifier);
         actualSPAttack = (int) (((getSpAttack() * 2 + getSpAttackIv()) * getLevel() / 100 + 5) * spAttackModifier);
-        actualDefence = (int) (((getDef() * 2 + getDefIv()) * getLevel() / 100 + 5) * defenceModifier);
-        actualSPDefence = (int) (((getSpDef() * 2 + getSpDefIv()) * getLevel() / 100 + 5) * spDefenceModifier);
+        actualDefence = (int) (((getDefense() * 2 + getDefIv()) * getLevel() / 100 + 5) * defenceModifier);
+        actualSPDefence = (int) (((getSpDefense() * 2 + getSpDefIv()) * getLevel() / 100 + 5) * spDefenceModifier);
 
     }
 
     // Move set Logic
-    public int calculateIV(){
+    public int calculateIV() {
         //
 
-        return (int) Math.floor(Math.random()*32);
+        return (int) Math.floor(Math.random() * 32);
     }
+
+    public void modifyStat(String statName, int changeAmount){
+        
+    }
+
     public void addMove(Move move) {
         movesSet.add(move);
     }
 
-    public void removeMove(Move move){
+    public void removeMove(Move move) {
         movesSet.remove(move);
     }
 
-    public void getMove(int index){
+    public void getMove(int index) {
         movesSet.get(index);
     }
 
@@ -249,7 +257,7 @@ public class Pokemon {
     }
 
     // combat logic
-    public void lvlUp(int expReceived){
+    public void lvlUp(int expReceived) {
         int totalEXP = getCurrentEXP() + expReceived;
 
         int levelUps = totalEXP / getExpToNextLvl();
@@ -257,24 +265,27 @@ public class Pokemon {
 
         setLevel(getLevel() + levelUps);
         setCurrentEXP(remainingEXP);
+
+        setExpToNextLvl((level*50)-currentEXP);
+        calculateActualStat();
     }
 
-    public boolean isFaint(){
-        if(getHealth()==0) {
+    public boolean isFaint() {
+        if (getHealth() == 0) {
             isDead = true;
-            return  true;
+            return true;
             //TODO set animation for fainting pokemon
         } else
             isDead = false;
         return false;
     }
 
-    public void heal(int healAmount){
-        if(getHealth()!=0){
+    public void heal(int healAmount) {
+        if (getHealth() != 0) {
             //TODO make sure that you cant heal a pokemon with 0 health for now it just sout
             System.out.println("Pokemon is dead");
         } else
-            setHealth(Math.min(getHealth()+healAmount,getMaxHealth()));
+            setHealth(Math.min(getHealth() + healAmount, getMaxHealth()));
     }
 
     public int getHealthIv() {
@@ -425,12 +436,12 @@ public class Pokemon {
         this.health = health;
     }
 
-    public int getDef() {
-        return def;
+    public int getDefense() {
+        return defense;
     }
 
-    public void setDef(int def) {
-        this.def = def;
+    public void setDefense(int defense) {
+        this.defense = defense;
     }
 
     public int getAttack() {
@@ -441,12 +452,12 @@ public class Pokemon {
         this.attack = attack;
     }
 
-    public int getSpDef() {
-        return spDef;
+    public int getSpDefense() {
+        return spDefense;
     }
 
-    public void setSpDef(int spDef) {
-        this.spDef = spDef;
+    public void setSpDefense(int spDefense) {
+        this.spDefense = spDefense;
     }
 
     public int getSpAttack() {
@@ -490,13 +501,13 @@ public class Pokemon {
     }
 
 
-    public String toString(){
+    public String toString() {
         return ("Name: " + " " + name + " " +
                 "Health: " + " " + health + " " +
                 "Attack: " + " " + attack + " " +
                 "Special Attack: " + " " + spAttack + " " +
-                "Defence: " + " " + def + " " + " " +
-                "Special Defence: " + " " + spDef + " " +
+                "Defence: " + " " + defense + " " + " " +
+                "Special Defence: " + " " + spDefense + " " +
                 "Speed: " + " " + speed + " " + " " +
                 "Level: " + " " + level + " " +
                 "Move Set: " + movesSet + "\n" +

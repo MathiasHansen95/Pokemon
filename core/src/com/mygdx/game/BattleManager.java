@@ -10,7 +10,7 @@ import java.util.List;
 
 public class BattleManager {
 
- private List<WildPokemon> wildPokemons;
+
  Pokemon characterPokemon;
  Pokemon enemyPokemon;
 
@@ -18,15 +18,14 @@ public class BattleManager {
 
  OpponentAI ai;
 
- public BattleManager(List<WildPokemon> wildPokemons, Pokemon characterPokemon) {
-     this.wildPokemons = wildPokemons;
+ public BattleManager(Pokemon characterPokemon, Pokemon enemyPokemon) {
      this.characterPokemon = characterPokemon;
      this.enemyPokemon = enemyPokemon;
      this.ai = new OpponentAI();
      }
 
     public void startBattle(){
-        enemyPokemon = chooseRandomPokemon();
+
         System.out.println("A wild " + enemyPokemon.getName() + " Appeared!");
 
         //mocked character pokemon just uses tackle
@@ -93,10 +92,6 @@ public class BattleManager {
          winner = characterPokemon;
 
      return  winner;
-    }
-
-    private WildPokemon chooseRandomPokemon(){
-     return wildPokemons.get((int) (Math.random() * wildPokemons.size()));
     }
 
     public Pokemon getCharacterPokemon() {

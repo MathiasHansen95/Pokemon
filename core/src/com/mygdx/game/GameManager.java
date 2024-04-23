@@ -6,16 +6,12 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.Data.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class GameManager extends ApplicationAdapter {
 	OpponentAI opponentAI;
-
-	//MOCK
-
-	List<WildPokemon> wildPokemons;
+	Pokemon charPokemon;
+	Pokemon oppPokemon;
 
 	SpriteBatch batch;
 	Arena arena = new Arena();
@@ -26,13 +22,29 @@ public class GameManager extends ApplicationAdapter {
 
 		batch = new SpriteBatch();
 
+
+        try {
+            Map<String, Pokemon> pokemonMap = DataReader.readPokemonData("assets/JSON/Pokemons.JSON");
+			Set<String> pokemonNames = pokemonMap.keySet();
+
+			Random random = new Random();
+			int randomIndex = random.nextInt(pokemonNames.size());
+
+			String randomPokeName = (String) pokemonNames.toArray()[randomIndex];
+
+			charPokemon = pokemonMap.get("Bulbasaur");
+			oppPokemon = pokemonMap.get(randomPokeName);
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
 		arena.create();
 
 		opponentAI = new OpponentAI();
-
-		BattleManager  battleManager;
-
-		wildPokemons = new ArrayList<>();
+		System.out.println(charPokemon);
 
 		//mock for testing
 
@@ -44,6 +56,7 @@ public class GameManager extends ApplicationAdapter {
 		ScreenUtils.clear(1, 1, 1, 1);
 		batch.begin();
 		arena.render();
+		drawPokemon(oppPokemon, 400,350);
 		batch.end();
 	}
 	

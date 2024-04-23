@@ -1,0 +1,12 @@
+seadra_sheet.png
+size: 290, 290
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+seadra
+  rotate: false
+  xy: 0, 0
+  size: 58, 52
+  orig: 156, 156
+  offset: 0, 0
+  index: -1
